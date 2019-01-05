@@ -1,29 +1,3 @@
-# import sys
-
-# sys.path.append(".")
-
-# import sizer.calculators
-
-# import numpy as np
-# import scipy.signal
-# import scipy.interpolate
-
-# import matplotlib.pyplot as plt
-
-# frequencies = np.logspace(0, 9, 1000)
-# H = scipy.signal.lti([], [- 1e+3 * 2 * np.pi, - 1e+5 * 2 * np.pi], 1e+3 * 1e+3 * 1e+5 * (2 * np.pi) ** 2)
-
-# frequencyResponse = H.freqresp(frequencies * 2 * np.pi)[1]
-
-# print("Calculated bandwidth", sizer.calculators.bandwidth(frequencies, frequencyResponse))
-
-# plt.plot(frequencies, np.abs(frequencyResponse))
-# plt.plot(np.logspace(0, 9, 10000), scipy.interpolate.interp1d(frequencies, np.abs(frequencyResponse))(np.logspace(0, 9, 10000)))
-# plt.xscale("log")
-# plt.yscale("log")
-# plt.grid(1)
-# plt.show()
-
 import unittest
 
 import sys
