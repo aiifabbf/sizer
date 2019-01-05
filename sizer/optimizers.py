@@ -54,6 +54,6 @@ class ScipyDifferentialEvolutionOptimizer(BaseOptimizer):
 class ScipyMinimizeOptimizer(BaseOptimizer):
 
     def _run(self):
-        return scipy.optimize.minimize(self._loss, x0=self._bounds[..., 0], bounds=self._bounds, options=dict(disp=True))
+        return scipy.optimize.minimize(self._loss, x0=self._bounds[..., 0], bounds=self._bounds)
 
 Optimizer = ScipyDifferentialEvolutionOptimizer
