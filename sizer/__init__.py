@@ -106,26 +106,31 @@ class Circuit:
         return (frequencies, vout / vin)
 
     @property
+    @functools.lru_cache()
     def bandwidth(self):
         frequencyResponse = self.frequencyResponse()
         return sizer.calculators.bandwidth(frequencyResponse[0], frequencyResponse[1])
 
     @property
+    @functools.lru_cache()
     def phaseMargin(self):
         frequencyResponse = self.frequencyResponse()
         return sizer.calculators.phaseMargin(frequencyResponse[0], frequencyResponse[1])
 
     @property
+    @functools.lru_cache()
     def gainMargin(self):
         frequencyResponse = self.frequencyResponse()
         return sizer.calculators.gainMargin(frequencyResponse[0], frequencyResponse[1])
 
     @property
+    @functools.lru_cache()
     def unityGainFrequency(self):
         frequencyResponse = self.frequencyResponse()
         return sizer.calculators.unityGainFrequency(frequencyResponse[0], frequencyResponse[1])
 
     @property
+    @functools.lru_cache()
     def gain(self):
         frequencyResponse = self.frequencyResponse()
         return sizer.calculators.gain(frequencyResponse[0], frequencyResponse[1])
