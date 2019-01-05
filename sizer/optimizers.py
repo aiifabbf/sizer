@@ -6,8 +6,13 @@ import sizer
 import time
 import traceback
 
+class EarlyStopLossReached(Exception):
+    def __init__(self, *args, circuit, **kwds):
+        super().__init__(*args, **kwds)
+        self.circuit = circuit
+
 class BaseOptimizer:
-    def __init__(self, circuitTemplate, loss, bounds, earlyStopLoss=None):
+    def __init__(self, circuitTemplate, loss, bounds, earlyStopLoss=-np.inf):
         self.circuitTemplate = circuitTemplate
         self.loss = loss
         self.bounds = bounds
@@ -21,26 +26,34 @@ class BaseOptimizer:
         loss = self.loss(circuit)
         end = time.time()
         print("\r total loss:", loss, ",", end - start, "s per seed", end=" ")
+        if loss <= self.earlyStopLoss:
+            raise EarlyStopLossReached("loss {} already reaches early stop loss {}.".format(loss, self.earlyStopLoss), circuit=circuit)
         return loss
+
+    def _run(self):
+        raise NotImplementedError("this method should be implemented by a subclass.")
+
+    def run(self):
+        try:
+            sol = self._run()
+            optimalParameters = sol.x
+            result = dict(zip(self.circuitTemplate.parameters, optimalParameters))
+            return sizer.Circuit(self.circuitTemplate, sol.x)
+        except EarlyStopLossReached as e:
+            traceback.print_exc()
+            return e.circuit
 
 class ScipyDifferentialEvolutionOptimizer(BaseOptimizer):
 
     def _checkpoint(self):
         pass
 
-    def run(self):
-        try:
-            sol = scipy.optimize.differential_evolution(self._loss, self._bounds, disp=True)
-        except:
-            traceback.print_exc()
-        result = dict(zip(self.circuitTemplate.parameters, sol.x))
-        return sizer.Circuit(self.circuitTemplate, sol.x)
+    def _run(self):
+        return scipy.optimize.differential_evolution(self._loss, self._bounds, disp=True)
 
 class ScipyMinimizeOptimizer(BaseOptimizer):
 
-    def run(self):
-        sol = scipy.optimize.minimize(self._loss, x0=self._bounds[..., 0], bounds=self._bounds)
-        result = dict(zip(self.circuitTemplate.parameters, sol.x))
-        return sizer.Circuit(self.circuitTemplate, sol.x)
+    def _run(self):
+        return scipy.optimize.minimize(self._loss, x0=self._bounds[..., 0], bounds=self._bounds, options=dict(disp=True))
 
 Optimizer = ScipyDifferentialEvolutionOptimizer

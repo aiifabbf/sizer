@@ -49,8 +49,8 @@ bounds.update({
     "vdc": [1, 2]
 })
 
-# optimizer = sizer.optimizers.Optimizer(circuitTemplate, loss, bounds)
-optimizer = sizer.optimizers.ScipyMinimizeOptimizer(circuitTemplate, loss, bounds)
+optimizer = sizer.optimizers.Optimizer(circuitTemplate, loss, bounds, earlyStopLoss=0)
+# optimizer = sizer.optimizers.ScipyMinimizeOptimizer(circuitTemplate, loss, bounds, earlyStopLoss=0)
 circuit = optimizer.run()
 print(circuit.netlist)
 print("total loss:", loss(circuit))
