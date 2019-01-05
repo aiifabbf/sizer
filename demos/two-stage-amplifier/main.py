@@ -63,18 +63,18 @@ import matplotlib.pyplot as plt
 
 plt.rcParams["axes.grid"] = True
 
-frequencies = circuit.frequencyResponse[0]
+frequencies, frequencyResponse = circuit.frequencyResponse()
 
 plt.subplot(211)
-plt.plot(frequencies, np.abs(circuit.frequencyResponse[1]))
+plt.plot(frequencies, np.abs(frequencyResponse))
 plt.xscale("log")
 plt.yscale("log")
-plt.vlines(sizer.calculators.unityGainFrequency(frequencies, circuit.frequencyResponse[1]), 0, 1e+3)
+plt.vlines(sizer.calculators.unityGainFrequency(frequencies, frequencyResponse), 0, 1e+3)
 
 plt.subplot(212)
-phaseResponse = np.angle(circuit.frequencyResponse[1], deg=True)
+phaseResponse = np.angle(frequencyResponse, deg=True)
 phaseResponse[np.where(phaseResponse > 0)] -= 360
 plt.plot(frequencies, phaseResponse)
 plt.xscale("log")
-plt.vlines(sizer.calculators.unityGainFrequency(frequencies, circuit.frequencyResponse[1]), -180, 0)
+plt.vlines(sizer.calculators.unityGainFrequency(frequencies, frequencyResponse), -180, 0)
 plt.show()

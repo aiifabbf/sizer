@@ -7,6 +7,7 @@ import numpy as np
 import string
 import logging
 import traceback
+import functools
 
 class CircuitTemplate:
     def __init__(self, netlist, rawSpice=""):
@@ -59,8 +60,7 @@ class Circuit:
 
         # self._cached = {}
 
-    # @functools.lru_cache()
-    @property
+    @functools.lru_cache() # This boosts performance...
     def frequencyResponse(self, start=1, end=1e+9, points=10, variation="dec"):
         analysis = self._simulator.ac(start_frequency=start, stop_frequency=end, number_of_points=points, variation=variation)
         frequencies = np.array(analysis.frequency)
@@ -107,25 +107,25 @@ class Circuit:
 
     @property
     def bandwidth(self):
-        frequencyResponse = self.frequencyResponse
+        frequencyResponse = self.frequencyResponse()
         return sizer.calculators.bandwidth(frequencyResponse[0], frequencyResponse[1])
 
     @property
     def phaseMargin(self):
-        frequencyResponse = self.frequencyResponse
+        frequencyResponse = self.frequencyResponse()
         return sizer.calculators.phaseMargin(frequencyResponse[0], frequencyResponse[1])
 
     @property
     def gainMargin(self):
-        frequencyResponse = self.frequencyResponse
+        frequencyResponse = self.frequencyResponse()
         return sizer.calculators.gainMargin(frequencyResponse[0], frequencyResponse[1])
 
     @property
     def unityGainFrequency(self):
-        frequencyResponse = self.frequencyResponse
+        frequencyResponse = self.frequencyResponse()
         return sizer.calculators.unityGainFrequency(frequencyResponse[0], frequencyResponse[1])
 
     @property
     def gain(self):
-        frequencyResponse = self.frequencyResponse
+        frequencyResponse = self.frequencyResponse()
         return sizer.calculators.gain(frequencyResponse[0], frequencyResponse[1])
