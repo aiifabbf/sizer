@@ -32,6 +32,7 @@ class CircuitTemplate:
         return Circuit(self, parameters)
 
 class Circuit:
+    parser = SpiceParser(source=".title\n.end") # 1.28 ms -> 65 us
     def __init__(self, circuitTemplate, parameters):
         """A determined circuit with parameters all specified
 
@@ -54,7 +55,8 @@ class Circuit:
             traceback.print_exc()
             raise ValueError("insufficient number of parameters")
 
-        self._circuit = SpiceParser(source=self.netlist).build_circuit()
+        self._circuit = self.parser.build_circuit()
+        self._circuit.raw_spice += self.netlist
         self._circuit.raw_spice += self.circuitTemplate.rawSpice
         self._simulator = self._circuit.simulator(simulator="ngspice-subprocess")
 
