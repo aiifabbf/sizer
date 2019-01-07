@@ -45,10 +45,6 @@ bounds.update({
     "cm": [1e-12, 10e-12]
 })
 
-bounds.update({
-    "vdc": [1, 2]
-})
-
 # optimizer = sizer.optimizers.Optimizer(circuitTemplate, loss, bounds, earlyStopLoss=0)
 optimizer = sizer.optimizers.ScipyMinimizeOptimizer(circuitTemplate, loss, bounds, earlyStopLoss=0)
 circuit = optimizer.run()
