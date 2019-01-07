@@ -9,6 +9,8 @@ import logging
 import traceback
 import functools
 
+import os
+
 class CircuitTemplate:
     def __init__(self, netlist, rawSpice=""):
         """An undetermined circuit with placeholders
@@ -32,7 +34,7 @@ class CircuitTemplate:
         return Circuit(self, parameters)
 
 class Circuit:
-    parser = SpiceParser(source=".title\n.end") # 1.28 ms -> 65 us
+    parser = SpiceParser(source=".title" + os.linesep + ".end") # 1.28 ms -> 65 us
     def __init__(self, circuitTemplate, parameters):
         """A determined circuit with parameters all specified
 
@@ -61,6 +63,29 @@ class Circuit:
         self._simulator = self._circuit.simulator(simulator="ngspice-subprocess")
 
         # self._cached = {}
+
+    @functools.lru_cache()
+    def ac(self, start=1, end=1e+9, points=10, variation="dec"):
+        """Do an AC small-signal simulation
+
+        Attributes
+        ----------
+
+        start : real number
+            simulation frequency range start
+        end : real number
+            simulation frequency range end
+        point : integer
+            - when `variation == "lin"`, number of points in total
+            - when `variation == "dec"`, number of points per decade
+            - when `variation == "oct"`, number of points per octave
+
+        Returns
+        -------
+
+        analysis : PySpice analysis object
+        """
+        return self._simulator.ac(start_frequency=start, stop_frequency=end, number_of_points=points, variation=variation)
 
     @functools.lru_cache() # This boosts performance...
     def frequencyResponse(self, start=1, end=1e+9, points=10, variation="dec"):
