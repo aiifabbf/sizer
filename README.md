@@ -2,6 +2,43 @@
 
 Automatically size all design parameters in a circuit to meet design specifications
 
+## Quickstart
+
+Note: Windows is currently not supported because the dependency [PySpice](https://github.com/FabriceSalvaire/PySpice) has [an issue](https://github.com/FabriceSalvaire/PySpice/issues/23) with raw data parsing. If you *really* have to try on Windows, you can follow [my comment here](https://github.com/FabriceSalvaire/PySpice/issues/23#issuecomment-452176011). However, it is not a perfect solution because it can't tell if a `\r\n` comes as a part of bytes that represent a number or as just a line break.
+
+1. clone this repo
+
+    ```sh
+    git clone https://github.com/aiifabbf/sizer.git
+    ```
+
+1. set up a virtual environment (recommended)
+
+    ```sh
+    cd ./sizer
+    python3 -m venv env
+    . env/bin/activate
+    ```
+
+    If you have installed numpy, scipy as system-level site packages, you can apply the `--system-site-packages` to avoid duplicate installation.
+    ```sh
+    cd ./sizer
+    python3 -m venv env --system-site-packages
+    . env/bin/activate
+    ```
+
+1. install dependencies
+
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+1. ready to go! Check out demo!
+
+    ```sh
+    python3 demos/two-stage-amplifier/main.py
+    ```
+
 ## Demo: a simple-Miller compensated two-stage amplifier
 
 ![structure of simple miller compensated two-stage amplifier](./demos/two-stage-amplifier/schematic.png)
