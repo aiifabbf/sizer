@@ -84,7 +84,7 @@ A typical workflow with sizer might be
 1. you have a topology
 1. choose variable parameters and their bounds
 1. define a loss function
-1. give it to `sizer.optimizer.Optimizer`
+1. give it to `sizer.optimizers.Optimizer`
 1. wait ~~a year~~ until it returns you an optimal set of parameters
 
 It is basically handing the tedious trial-and-error to a program instead of doing everything on our own.
