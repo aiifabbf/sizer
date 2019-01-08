@@ -1,1 +1,3 @@
-PySpice
+git+https://github.com/FabriceSalvaire/PySpice.git#egg=PySpice
+numpy
+scipy
