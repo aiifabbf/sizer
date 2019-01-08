@@ -15,18 +15,21 @@ with open("./demos/two-stage-amplifier/two-stage-amp.cir") as f:
 def bandwidthLoss(circuit):
     try:
         return np.maximum(0, (5e+3 - circuit.bandwidth) / 5e+3) ** 2
+        # return np.maximum(0, (5e+3 - circuit.bandwidth) / 5e+3)
         # return (1e+6 - circuit.bandwidth) / 1e+6
     except:
-        print("bandwidth undefined")
+        print("bandwidth undefined", end="\r")
         return 1
 
 def gainLoss(circuit):
     return np.maximum(0, (1e+3 - np.abs(circuit.gain)) / 1e+3) ** 2
+    # return np.maximum(0, (1e+3 - np.abs(circuit.gain)) / 1e+3)
     # return (1e+3 - np.abs(circuit.gain)) / 1e+3
 
 def phaseMarginLoss(circuit):
     try:
         return np.maximum(0, (60 - circuit.phaseMargin) / 60) ** 2
+        # return np.maximum(0, (60 - circuit.phaseMargin) / 60)
     except:
         return 0
 
@@ -45,8 +48,11 @@ bounds.update({
     "cm": [1e-12, 10e-12]
 })
 
-# optimizer = sizer.optimizers.Optimizer(circuitTemplate, loss, bounds, earlyStopLoss=0)
-optimizer = sizer.optimizers.ScipyMinimizeOptimizer(circuitTemplate, loss, bounds, earlyStopLoss=0)
+optimizer = sizer.optimizers.Optimizer(circuitTemplate, loss, bounds, earlyStopLoss=0)
+# optimizer = sizer.optimizers.ScipyMinimizeOptimizer(circuitTemplate, loss, bounds, earlyStopLoss=0)
+# circuit = circuitTemplate([bounds[i][0] for i in circuitTemplate.parameters])
+# frequencies, frequencyResponse = circuit.getFrequencyResponse()
+# raise Exception()
 circuit = optimizer.run()
 print(circuit.netlist)
 print("total loss:", loss(circuit))
@@ -54,12 +60,13 @@ print("optimal parameters", dict(zip(circuitTemplate.parameters, circuit.paramet
 print("bandwidth:", circuit.bandwidth)
 print("gain:", circuit.gain)
 print("phase margin:", circuit.phaseMargin)
+# exit()
 
 import matplotlib.pyplot as plt
 
 plt.rcParams["axes.grid"] = True
 
-frequencies, frequencyResponse = circuit.frequencyResponse()
+frequencies, frequencyResponse = circuit.getFrequencyResponse()
 
 plt.subplot(211)
 plt.plot(frequencies, np.abs(frequencyResponse))
