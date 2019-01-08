@@ -93,3 +93,10 @@ class ValidnessTest(unittest.TestCase):
         plt.xscale("log")
         plt.vlines(sizer.calculators.positiveFeedbackFrequency(frequencies, frequencyResponse), -180, 0)
         plt.show()
+
+    def testSlewRate(self):
+        time = np.linspace(0, 1e-3, 1000)
+        response = scipy.signal.step(H, T=time)
+        print("Calculated slew rate is", sizer.calculators.slewRate(time, response))
+        plt.plot(*response)
+        plt.show()
