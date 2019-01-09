@@ -105,7 +105,11 @@ class Circuit:
         return np.array(vin) # remove units
 
     def getOutput(self, nodeList):
-        if "vout" in nodeList:
+        if "vout+" in nodeList:
+            vout = nodeList["vout+"] - nodeList["vout-"]
+        elif "vo+" in nodeList:
+            vout = nodeList["vo+"] - nodeList["vo-"]
+        elif "vout" in nodeList:
             vout = nodeList["vout"]
         elif "vo" in nodeList:
             vout = nodeList["vo"]
