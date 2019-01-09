@@ -33,6 +33,13 @@ Note: Windows is currently not supported because the dependency [PySpice](https:
     pip install -r requirements.txt
     ```
 
+1. install ngspice
+
+    On Debian it is
+    ```sh
+    apt install ngspice
+    ```
+
 1. ready to go! Check out demo!
 
     ```sh
@@ -223,7 +230,7 @@ Challenge: can you come up with a choice of all MOSFETs' sizes and the compensat
     ```python
     print(optimalCircuit.unityGainFrequency) # check out the ugf
     print(optimalCircuit.bandwidth) # check out the bandwidth
-    print(optimalCircuit.getFrequencyResponse(start=1, end=1e+9) # get frequency response in a frequency range
+    print(optimalCircuit.getFrequencyResponse(start=1, end=1e+9)) # get frequency response in a frequency range
     ```
 
 ## Why
