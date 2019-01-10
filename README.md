@@ -265,3 +265,7 @@ I just don't know...this three-stage amplifier is too complex for my mind.
 > Simulators are inaccurate.
 
 but manual calculation is also full of approximation (otherwise you are stuck at workflow 1 step 3), much much more inaccurate than simulators. If you believe in your hand calc, why in the world should you not trust simulators?
+
+-----
+
+Please note that `CMOS_035_Spice_Model.lib` is not part of this project. It is used only for demos.

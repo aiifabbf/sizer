@@ -1,0 +1,409 @@
+*****************************************************************************
+*****************************   README FILE   *******************************
+*****************************************************************************
+*
+*     0.35/0.30um Logic Salicide Process SPICE Model
+*
+* 1. TECHNOLOGY: 0.35/0.30um Psub Twin-Well CMOS Salicide Process
+*                3.3V operation TOX=70A LMIN for NMOS/PMOS:0.35um/0.35um
+* 2. Model Version: *** (change document format) 
+* 3. Model: HSPICE Version *** LEVEL 49.(BSIM3V3.1)
+* 4. UNIT: DEFAULTS IN HSPICE LEVEL 49.
+* 5. THE PARAMETERS WHICH NOT LISTED ARE DEFAULT VALUES IN HSPICE
+*    LEVEL 49.
+* 6. HDIF depend on actual layout.  Minimum rules are shown in this parameter
+* 7. Lot-wafer  : ***
+* 8. Date       :  *** 
+* 9. ***
+*10. Temperature Range : -55C <= Temp. <= 135C
+*11. NMOS Model Library and Device Range:
+*    NMOS Model Name: N_33   
+*    *----------------------*
+*    |  0.5um <= W <= 100um  |
+*    |  0.35um <= L <= 50um  |
+*    |----------------------*
+*    |        TT            |   	
+*    |        FF            |
+*    |        SS            |
+*    |        FNSP          |
+*    |        SNFP          |
+*    *----------------------*
+*12. PMOS Model Library and Device Range:
+*    PMOS Model Name: P_33  
+*    *----------------------*
+*    |  0.5um <= W <= 100um  |
+*    |  0.35um <= L <= 50um  |
+*    |----------------------*
+*    |        TT            |   	
+*    |        FF            |
+*    |        SS            |
+*    |        FNSP          |
+*    |        SNFP          |
+*    *----------------------*
+*
+*
+*****************************************************************************
+*****************************   Spice Model   *******************************
+*****************************************************************************
+.LIB TT
+.model n_33 NMOS
++Level=        49 
+*
+* GENERAL PARAMETERS
+*
+*+ACM=3
++lmin=3.5e-7 lmax=5.0e-5 wmin=5e-7 wmax=1.0e-4
+*+Tref=27.0
++version = 3.1
++Tox= 7.00000E-09
++Xj= 2.3000000E-07 
++Nch= 2.6427001E+17 
++lln= 1.0000000
++lwn= 1.0000000
++wln= 1.0000000
++wwn= 1.0000000
++lint= -1.1125000E-08
++ll= 1.0879250E-14
++lw= 6.7721500E-15
++lwl= -2.4999999E-21
++wint= 1.1050000E-07
++wl= -2.0138318E-14
++ww= -1.3588075E-14
++wwl= 3.34E-21
++Mobmod=  1 
++binunit= 2
++Dwg= -6.8713000E-09 
++Dwb= 9.7288070E-09 
+*
+* THRESHOLD VOLTAGE PARAMETERS
+*
++Vth0= 0.6070000 
++K1= 0.7001386 
++K2= -1.7500001E-03 
++K3= -10.4288020 
++Dvt0= 16.1041740 
++Dvt1= 0.7475495 
++Dvt2= -3.2047360E-02 
++Dvt0w= 0.1473920 
++Dvt1w= 1.8000000E+05 
++Dvt2w= -2.4000000E-02 
++Nlx= 1.7155087E-07 
++W0= 3.3856000E-07 
++K3b= 3.4824250 
+*
+* MOBILITY PARAMETERS
+*
++Vsat= 9.4200000E+04 
++Ua= 2.5381600E-10 
++Ub= 1.1360000E-18 
++Uc= 3.5605000E-11 
++Rdsw= 5.5450260E+02 
++Prwb= 1.3038516E-08 
++Prwg= -7.5000000E-09 
++Wr= 1.0000000 
++U0= 4.0045690E+02 
++A0= 0.6529300 
++Keta= -1.5300000E-03 
++A1= 0.00 
++A2= 0.7706810 
++Ags= 8.6840000E-02 
++B0= 1.3310000E-07 
++B1= 1.5000001E-06 
+*
+* SUBTHRESHOLD CURRENT PARAMETERS
+*
++Voff= -0.1241650 
++NFactor= 0.9560750 
++Cit= 2.3285000E-05 
++Cdsc= 8.8010000E-04 
++Cdscb= 5.0500000E-05 
++Cdscd= 1.0000000E-20 
++Eta0= 1.7094001E-02 
++Etab= -1.3354999E-02 
++Dsub= 0.3112000 
+*
+* ROUT PARAMETERS
+*
++Pclm= 1.8041080 
++Pdiblc1= 0.1427000 
++Pdiblc2= 1.1949505E-03 
++Pdiblcb= -5.7400000E-04 
++Drout= 0.5892000 
++Pscbe1= 3.9285000E+08 
++Pscbe2= 8.5859990E-06 
++Pvag= 0.3074510 
++Delta= 1.4900001E-03 
++Alpha0= 0.0 
++Beta0= 30.0000000 
+*
+* TEMPERATURE EFFECTS PARAMETERS
+*
++kt1= -0.2930000 
++kt2= -2.7159998E-02 
++At= 2.8170000E+04 
++Ute= -1.0050000 
++Ua1= 4.0940000E-09 
++Ub1= -4.5000000E-18 
++Uc1= -7.8400000E-11 
++Kt1l= 0.00 
++Prt= 1.0000000E+02 
+*
+* CAPACITANCE PARAMETERS
+*
++Cj= 1E-3 
++Mj= .359 
++Pb= 0.753 
++Cjsw= 3.13E-10 
+*+Cjgate= 3.21E-10 
++Mjsw= .43 
+*+PHP= 0.92 
++Cgdo=1.5E-10
++Cgso=1.5E-10
++Js=3.7E-6
++Jsw=7.83E-11
++Capmod= 2 
++NQSMOD= 0 
++Elm= 5 
++Xpart= 1 
++Ckappa= .6 
++cf=0
++Rsh=5.7
++hdif=4.5e-7
+*
+*MOSFET BSIM3v3 noimod=2 & 3 noise parameters:
++noimod= 2 
++NoiA=8.0769981E+19
++NoiB=4.6493420E+06
++NoiC=-3.0188414E-11
++Ef=0.9337443
++Em=4.0187329E+06
+
+
+*********************************************************************
+.model p_33 PMOS
++Level=       49 
+*
+* GENERAL PARAMETERS
+*
+*+ACM=3
++lmin=3.5e-7 lmax=5.0e-5 wmin=5e-7 wmax=1.0e-4
+*+Tref=27.0
++version = 3.1
++Tox= 7.00000E-09
++Xj= 1.8999998E-07
++Nch= 9.9481000E+16
++lln= 1.0000000
++lwn= 1.0000000
++wln= 1.0000000
++wwn= 1.0000000
++lint= -4.3660000E-08
++ll= 3.6450000E-15
++lw= -4.3645000E-15
++lwl= 0.00
++wint= 1.0750000E-07
++wl= -1.0747600E-14
++ww= -9.3500000E-15
++wwl= 0.00
++Mobmod=  1
++binunit= 2
++Dwg= -2.1300000E-08
++Dwb= 1.7106316E-12
+*
+* THRESHOLD VOLTAGE PARAMETERS
+*
++Vth0= -0.8019000
++K1= 0.3477580
++K2= -1.5120000E-03
++K3= 12.7474540
++Dvt0= 2.5967000
++Dvt1= 0.7361000
++Dvt2= -0.1008000
++Dvt0w= 8.1884000
++Dvt1w= 6.8075000E+06
++Dvt2w= -4.2400000E-02
++Nlx= 1.9117999E-07
++W0= 5.6500000E-07
++K3b= -1.6694280
+*
+* MOBILITY PARAMETERS
+*
++Vsat= 1.8240000E+05
++Ua= 4.2080000E-10
++Ub= 1.9735200E-18
++Uc= -1.2000000E-11
++Rdsw= 1.0818186E+03
++Prwb= -0.1409500
++Prwg= -1.5000000E-20
++Wr= 1.0000000
++U0= 1.7853294E+02
++A0= 1.0589399
++Keta= -4.1800000E-03
++A1= 2.2400000E-08
++A2= 0.5876999
++Ags= 0.2868020
++B0= 2.5700001E-07
++B1= 1.7799999E-15
+*
+* SUBTHRESHOLD CURRENT PARAMETERS
+*
++Voff= -0.1255000
++NFactor= 0.9781169
++Cit= 7.8803940E-04
++Cdsc= 2.5750000E-03
++Cdscb= 1.6387998E-03
++Cdscd= 1.4824999E-03
++Eta0= 0.1614200
++Etab= -8.1400000E-03
++Dsub= 0.5489320
+*
+* ROUT PARAMETERS
+*
++Pclm= 10.7633990
++Pdiblc1= 1.1399984E-02
++Pdiblc2= 3.3800010E-04
++Pdiblcb= -5.0000000E-07
++Drout= 0.8620000
++Pscbe1= 7.2900000E+08
++Pscbe2= 1.1299417E-06
++Pvag= 24.5730990
++Delta= 2.9550001E-02
++Alpha0= 0.01
++Beta0= 80.0000000
+*
+* TEMPERATURE EFFECTS PARAMETERS
+*
++kt1= -0.5719986
++kt2= -4.6010590E-02
++At= 9.7486740E+03
++Ute= -1.5800400
++Ua1= 1.0412212E-09
++Ub1= -3.7637900E-18
++Uc1= -9.3639840E-12
++Kt1l= -1.2900001E-10
++Prt= 1.0000000E-20
+*
+* CAPACITANCE PARAMETERS
+*
++Cj= .00172
++Mj= .624
++Pb= 1.2
++Cjsw= 2.49E-10
+*+Cjgate= 3.22E-10
++Mjsw= .383
+*+PHP= .977
++Cgdo=1.4E-10
++Cgso=1.4E-10
++Js=4.85E-5
++Jsw=2.02E-9
++Capmod= 2 
++NQSMOD= 0
++Elm= 5
++Xpart= 1
++Ckappa= .6
++Clc= .0000001
++Cle= .6
++cf=0
++Rsh=3.5
++hdif=4.5e-7
+*
+*MOSFET BSIM3v3 noimod=2 & 3 noise parameters:
++noimod= 2 
++NoiA=9.1217914E+22
++NoiB=1.0
++NoiC=-6.5945354E-13
++Ef=1.0731569
++Em=5.4858829E+07
+.ENDL TT
+
+.LIB SS
+***
+.ENDL SS
+
+.LIB FF
+***
+.ENDL FF
+
+.LIB SNFP
+***
+.ENDL SNFP
+
+.LIB FNSP
+***
+.ENDL FNSP
+
+
+********************************************************************************
+*Lib of Resistor
+*Include 4 types resistors. They are npoly, nwell, nplus, plus.
+********************************************************************************
+
+.LIB Resistor
+********************************************************************************
+* npoly resistor
+********************************************************************************
+.subckt npoly n1 n2 l=length w=width  
+.param 
++TC1=5.8689E-4	
++TC2=2.8407E-7
++VC1=3.8501E-3
++VC2=6.6478E-4
++rsh=8.5678
++pt='temper'
++dW=0.03735E-6
+.param
++tfac='1+tc1*(pt-25)+tc2*(pt-25)*(pt-25)'
+r1 n1 n2 'rsh*l/(w-dw)*(1+vc1*abs(v(n2,n1))+vc2*v(n2,n1)*v(n2,n1))*tfac'
+.ends npoly
+
+********************************************************************************
+*  NWELL resistor
+********************************************************************************
+.subckt NWELL n1 n2 l=length w=width  
+.param 
++TC1=4.3795E-3	
++TC2=1.7049E-5
++VC1=-1.7170E-4
++VC2=6.7559E-3
++rsh=885.3325
++pt='temper'
++dW=0.79955E-6
+.param
++tfac='1+tc1*(pt-25)+tc2*(pt-25)*(pt-25)'
+r1 n1 n2 'rsh*l/(w-dw)*(1+vc1*abs(v(n2,n1))+vc2*v(n2,n1)*v(n2,n1))*tfac'
+.ends npoly
+
+********************************************************************************
+*   NPLUS resistor
+********************************************************************************
+.subckt NPLUS n1 n2 l=length w=width  
+.param  
++TC1=1.3666E-3	
++TC2=8.8812E-7
++VC1=9.0911E-4
++VC2=2.7058E-5
++rsh=68.2250
++pt='temper'
++dW=-0.05325E-6
+.param
++tfac='1+tc1*(pt-25)+tc2*(pt-25)*(pt-25)'
+r1 n1 n2 'rsh*l/(w-dw)*(1+vc1*abs(v(n2,n1))+vc2*v(n2,n1)*v(n2,n1))*tfac'
+.ends npoly
+
+********************************************************************************
+*   PPLUS resistor
+********************************************************************************
+.subckt PPLUS n1 n2 l=length w=width  
+.param 
++TC1=1.2423E-3	
++TC2=8.8516E-7
++VC1=6.3255E-4
++VC2=2.2371E-6
++rsh=139.8400
++pt='temper'
++dW=-0.06845E-6
+.param
++tfac='1+tc1*(pt-25)+tc2*(pt-25)*(pt-25)'
+r1 n1 n2 'rsh*l/(w-dw)*(1+vc1*abs(v(n2,n1))+vc2*v(n2,n1)*v(n2,n1))*tfac'
+.ends npoly
+
+.endl Resistor
