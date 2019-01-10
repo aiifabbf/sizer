@@ -22,7 +22,7 @@ class BaseOptimizer:
 
     def _loss(self, parameters):
         start = time.time() # 0.1 us
-        circuit = sizer.Circuit(self.circuitTemplate, parameters)
+        circuit = self.circuitTemplate(parameters) # compatible to CircuitTemplateList
         loss = self.loss(circuit)
         end = time.time() # 0.1 us
         print("\r total loss:", loss, ",", end - start, "s per seed", end=" ") # 9 us
@@ -37,8 +37,7 @@ class BaseOptimizer:
         try:
             sol = self._run()
             optimalParameters = sol.x
-            result = dict(zip(self.circuitTemplate.parameters, optimalParameters))
-            return sizer.Circuit(self.circuitTemplate, sol.x)
+            return self.circuitTemplate(optimalParameters) # compatible to CircuitTemplateList
         except EarlyStopLossReached as e:
             traceback.print_exc()
             return e.circuit

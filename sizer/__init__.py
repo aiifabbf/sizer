@@ -33,9 +33,44 @@ class CircuitTemplate:
     def __call__(self, parameters):
         return Circuit(self, parameters)
 
-class CircuitTemplates(list):
+class CircuitTemplateList(list):
+    """A list of circuit templates with undetermined circuits
+
+    Sometimes, you may need different external configurations to measure different performance figures. For example, to get the gain and bandwidth, you might need to configure the amplifier with an open loop, but to get the transient slew rate, you may need to configure the amplifier with a unity gain close loop (output node shorted to negative input node). This is the class to achieve this kind of purposes.
+
+    Examples
+    --------
+
+    Suppose you have a `CircuitTemplate` object for AC simulation called `acTemplate` and a `CircuitTemplate` object for transient simulation called `tranTemplate`, simply put them into a list and send to `CircuitTemplateList` like this:
+    ```
+    circuitTemplateList = CircuitTemplateList([tranTemplate, acTemplate])
+    ```
+
+    When defining the total loss function, notice that the parameter received by the function becomes a list of `Circuit` object instead of a single `Circuit` object. The order is preserved, which means the 1st item in the list is a `Circuit` object instantiated from `tranTemplate` and the 2nd item is a `Circuit` object instantiated from `acTemplate`.
+    ```
+    def loss(circuitList): # the received parameter is a list of circuits instead of a single circuit
+        tranCircuit = circuitList[0] # order is preserved
+        acCircuit = circuitList[1]
+        return np.sum([bandwidthLoss(acCircuit), gainLoss(acCircuit), slewRateLoss(tranCircuit)]) # do what you did before
+    ```
+
+    Note
+    ----
+
+    If one placeholder shows up in multiple templates, they will be considered as the same variable parameter across ALL the templates. For example, if you have defined M2's width `w2` in `acTemplate` and defined M2's width `w2` again in `tranTemplate`, these two `w2` are the same parameter, and they will be replaced by the same number in a seed.
+    """
+    def __init__(self, iterable):
+        super().__init__(iterable)
+        
+        parameters = set()
+        self.parameters = list(functools.reduce(parameters.union, [i.parameters for i in self])) # gather all unique parameters
+        self.sliceMap = {
+            i: np.array([self.parameters.index(parameter) for parameter in i.parameters]) for i in self
+        }
+        # this `sliceMap` is used later in `__call__`. Keys are each `circuitTemplate` object, and values are their own parameters' positions in this list's `self.parameters`. So later in `__call__`, one can use `parameters[self.sliceMap[circuit]]` to get the precise parameters that should be sent to each circuit object.
+
     def __call__(self, parameters):
-        return list(Circuit(i, parameters) for i in self)
+        return list(Circuit(i, parameters[self.sliceMap[i]]) for i in self)
 
 class Circuit:
     parser = SpiceParser(source=".title" + os.linesep + ".end") # 1.28 ms -> 65 us
@@ -66,7 +101,7 @@ class Circuit:
             self._netlist = self.circuitTemplate.netlist.format(**mapping)
         except:
             traceback.print_exc()
-            raise ValueError("insufficient number of parameters")
+            raise ValueError("insufficient number of parameters. Expect {} parameters: {}. Get {} parameters: {}".format(len(self.circuitTemplate.parameters), self.circuitTemplate.parameters, len(self.parameters), self.parameters))
 
         self._circuit = self.parser.build_circuit()
         self._circuit.raw_spice += self._netlist
