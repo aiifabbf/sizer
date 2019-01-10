@@ -7,6 +7,14 @@ import functools
 class CalculationError(Exception):
     pass
 
+def conditionFirstOccurrenceIndex(sequence, condition):
+    """Return the smallest index of all the elements in `sequence` where `condition` is true.
+    """
+    try:
+        return np.min(np.where(condition))
+    except:
+        raise CalculationError("condition is never met in this sequence.")
+
 def bandwidth(frequenciesInHertz, frequencyResponse, initialGuess=1e+3):
     """Calculate the frequency at which the absolute value of frequency response drops to 1 / sqrt(2) of its value at 1 Hz.
 
@@ -77,7 +85,6 @@ def positiveFeedbackFrequency(frequenciesInHertz, frequencyResponse, initialGues
     phaseResponse[np.where(phaseResponse > 0)] -= 360
     try:
         firstBelowNegative180degIndex = np.min(np.where(phaseResponse < -180))
-        # todo
         phaseResponseInterpolated = scipy.interpolate.interp1d(frequenciesInHertz[firstBelowNegative180degIndex - 1: firstBelowNegative180degIndex + 1], phaseResponse[firstBelowNegative180degIndex - 1: firstBelowNegative180degIndex + 1], bounds_error=False)
         return scipy.optimize.root(lambda x: phaseResponseInterpolated(x) + 180, frequenciesInHertz[firstBelowNegative180degIndex - 1]).x[0]
     except:
@@ -102,9 +109,6 @@ def phaseMargin(frequenciesInHertz, frequencyResponse):
     # Attempt to fix this with naive approach.
     phaseResponse[np.where(phaseResponse > 0)] -= 360
     if np.any(phaseResponse <= -180):
-        # todo
-    # try:
-        # _ = np.min(np.where(phaseResponse < -180))
         phaseResponseInterpolated = scipy.interpolate.interp1d(frequenciesInHertz, phaseResponse, bounds_error=False)
         return 180 - np.abs(phaseResponseInterpolated(ugf))
     else:
@@ -134,5 +138,70 @@ def gain(frequenciesInHertz, frequencyResponse):
     except:
         raise CalculationError("impossible to calculate the DC gain because the data does not contain gain at 1 Hz.")
 
-def slewRate(time, response):
-    return np.max(np.abs(np.diff(response) / np.diff(time)))
+def slewRate(timeInSecond, wave):
+    r"""Calculate the slew rate by naive definition
+
+    Notes
+    -----
+
+    There exists huge ambiguity about what really is slew rate. According to Wikipedia, slew rate stands for the maximum absolute value of the output's derivative to time:
+
+    .. math::
+
+        SR = \max\left|{dV_o \over dt}\right|
+    
+    However, in some context, slew rate means the 2 thresholds (often 10% of delta and 90% of delta) divided by the time it takes the wave to rise from the low threshold to the high threshold. For example, consider a wave that travels from 1 V to 2 V. The slew rate is sometimes considered as (1.9 - 1.1) divided by the time it takes the wave to go up from 1.1 V to 1.9 V. If the duration is 1 s, then slew rate is 0.8/1 = 0.8 V/s.
+    """
+    return np.max(np.abs(np.diff(wave) / np.diff(timeInSecond)))
+
+def risingTime(timeInSecond, wave, threshold1=None, threshold2=None):
+    """Measure the time it takes the wave to increase from `threshold1` to `threshold2` for the first time.
+
+    Attributes
+    ----------
+
+    timeInSecond : time sequence
+    wave : wave sequence
+    threshold1 : low threshold
+    threshold2 : high threshold
+
+    Note
+    ----
+
+    It will not check whether threshold2 is greater than threshold1.
+    """
+    threshold1 = threshold1 or np.min(wave)
+    threshold2 = threshold2 or np.max(wave)
+    index1 = conditionFirstOccurrenceIndex(wave, wave > threshold1)
+    index2 = conditionFirstOccurrenceIndex(wave, wave > threshold2)
+    interpolater1 = scipy.interpolate.interp1d(timeInSecond[index1 - 1: index1 + 1], wave[index1 - 1: index1 + 1], bounds_error=False)
+    interpolater2 = scipy.interpolate.interp1d(timeInSecond[index2 - 1: index2 + 1], wave[index2 - 1: index2 + 1], bounds_error=False)
+    time1 = scipy.optimize.root(lambda x: interpolater1(x) - threshold1, timeInSecond[index1 - 1]).x[0]
+    time2 = scipy.optimize.root(lambda x: interpolater2(x) - threshold2, timeInSecond[index2 - 1]).x[0]
+    return time2 - time1
+
+def fallingTime(timeInSecond, wave, threshold1=None, threshold2=None):
+    """Measure the time it takes the wave to decrease from `threshold1` to `threshold2` for the first time.
+
+    Attributes
+    ----------
+
+    timeInSecond : time sequence
+    wave : wave sequence
+    threshold1 : high threshold
+    threshold2 : low threshold
+
+    Note
+    ----
+
+    It will not check whether threshold1 is greater than threshold2.
+    """
+    threshold1 = threshold1 or np.max(wave)
+    threshold2 = threshold2 or np.min(wave)
+    index1 = conditionFirstOccurrenceIndex(wave, wave < threshold1)
+    index2 = conditionFirstOccurrenceIndex(wave, wave < threshold2)
+    interpolater1 = scipy.interpolate.interp1d(timeInSecond[index1 - 1: index1 + 1], wave[index1 - 1: index1 + 1], bounds_error=False)
+    interpolater2 = scipy.interpolate.interp1d(timeInSecond[index2 - 1: index2 + 1], wave[index2 - 1: index2 + 1], bounds_error=False)
+    time1 = scipy.optimize.root(lambda x: interpolater1(x) - threshold1, timeInSecond[index1 - 1]).x[0]
+    time2 = scipy.optimize.root(lambda x: interpolater2(x) - threshold2, timeInSecond[index2 - 1]).x[0]
+    return time2 - time1
