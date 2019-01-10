@@ -1,0 +1,19 @@
+*Sheet Name:/OPA_SR
+V1  Vp GND dc 1.65 ac 0.5
+V2  Vn GND dc 1.65 ac -0.5
+C2  Vout GND 4e-12
+C1  /3 Vout {cm}
+M7  Vout /6 VDD VDD p_33 l={l7} w={w7}
+M6  Vout /3 GND GND n_33 l={l6} w={w6}
+M2  /3 vp /1 VDD p_33 l={l12} w={w12}
+M1  /2 vn /1 VDD p_33 l={l12} w={w12}
+M4  /3 /2 GND GND n_33 l={l34} w={w34}
+M3  /2 /2 GND GND n_33 l={l34} w={w34}
+M5  /1 /6 VDD VDD p_33 l={l5} w={w5}
+V0  VDD GND 3.3
+M8  /6 /6 VDD VDD p_33 l={l8} w={w8}
+I1  /6 GND 10e-6
+
+.lib CMOS_035_Spice_Model.lib tt
+
+.end
