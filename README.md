@@ -293,13 +293,50 @@ The story holds true for a manual design procedure too. You need multiple schema
         ])
     ```
 
-    Be sure that each loss receives the right circuit. Putting `acCircuit` into `slewRateLoss` won't do any good!
+    Be sure that each loss receives the right circuit. `Circuit` objects will not check (because it does not know) whether some property, such as bandwidth, is well-defined for this circuit. Putting `acCircuit` into `slewRateLoss` won't do any good!
 
 1. initialize your optimizer like before
 
     ```python
     optimizer = sizer.optimizers.Optimizer(templateList, loss, bounds, earlyStopLoss=0)
     ```
+
+### Customize optimizers
+
+I haven't tried other optimizers than what Scipy offers yet, because through some performance analysis I believe the bottleneck is not due to Scipy's minimization algorithms. But in case you want to apply your own optimization algorithm, you can try the following.
+
+You may have wondered why the parameter `parameters` passed for `Circuit.__init__` is so weird: it is a list or `np.ndarray` instead of a Python `dict`. That is because you can call a `CircuitTemplate` (and `CircuitTemplateList`!) like a function, passing a vector to it, and it will return you a `Circuit` object.
+```python
+template = sizer.CircuitTemplate(someNetlistString) # some super cool ancient circuit topology that will save the world but 13 variables are missing
+mySuperOptimalParameters = [10e-9] * 13 # study[1] shows that making every MOSFET size figure to 10 nm maximizes overall performance so I am doing this
+circuit = template(mySuperOptimalParameters) # -> a circuit with all placeholders in the template netlist replaced with `mySuperOptimalParameters`
+```
+
+So you see that there is no secret. Basically, those optimizers in `sizer.optimizers` instantiate circuits from templates every seed and return them to your loss function. If you plan to use a 3rd party optimizer which has no idea about analog (I have no idea about analog either, sad), you can define the loss function *with respect to a vector* instead of a `Circuit` object like we did before. Just don't forget to instantiate circuits first
+
+### Specify hints
+
+A `Circuit` object provides many useful, convenient properties like
+- `circuit.bandwidth` gives you the bandwidth
+- `circuit.unityGainFrequency` gives you the unity-gain frequency
+- ...
+
+However, these properties come from simulations too. To get an amplifier's unity gain frequency, first you have to sweep a wide frequency range, otherwise the frequency response curve stops before the amplitude drops to 1, and when this happen, it becomes impossible to measure exactly at how many Hertz the amplitude is 1. It is also unrealistic to extend very far away into some super high frequencies because that takes time (I will test on this to see if it has large negative effects on AC, but its effect on transient is often very clear).
+
+That is why and where `hints` comes into play. As the name says, it provides hints and those convenient properties depend very hard on it. If you find anything wrong with hints, you can always change it at anytime
+```python
+def loss(circuitList):
+    acCircuit, opCircuit, tranCircuit = circuitList
+    acCircuit.hints["ac"]["end"] = 10e+12 # this is such a good amplifier, its ugf extends to THz.
+    return np.sum([
+        bandwidthLoss(acCircuit),
+        staticPowerLoss(opCircuit),
+        slewRateLoss(tranCircuit),
+        ... # other loss
+    ])
+```
+
+Note: I made `hints` a property to `Circuit` objects, not `CircuitTemplate`, because I think a template has undetermined parameters so giving it hints makes no sense. You can question my decision (well, any decision) in issues.
 
 ## Why
 
