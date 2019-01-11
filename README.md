@@ -233,6 +233,74 @@ Challenge: can you come up with a choice of all MOSFETs' sizes and the compensat
     print(optimalCircuit.getFrequencyResponse(start=1, end=1e+9)) # get frequency response in a frequency range
     ```
 
+## Advanced usage
+
+There always exists some rare use cases (well, maybe not very rare for you). Since this project is under active development, any missing feature is welcome at issues.
+
+### Multiple circuit templates
+
+In [workflow section](#Workflow), we only focus on the small-signal (AC) performance of the simple-Miller compensated two-stage amplifier, and try to meet only 3 design specs. However, in real design, specs are often not so simple as just 3, and they often involve a combination of transient, AC, poles and zeros (PZ), operational points (OP)...What is more, in order to measure all of these, the core circuit has to be configured different externally. For example, an open loop, with the differential inputs connected to two voltage sources, and with the output node connected to the load capacitor, is needed to perform an AC simulation, but a closed loop, with the positive differential input connected to a step voltage, and with the negative differential input shorted to the output node, that forms a *unity-gain configuration* is often needed to measure an amplifier's transient performance, such as slew rate (SR) and overshoot. 
+
+The story holds true for a manual design procedure too. You need multiple schematic graphs to measure one core circuit. Except that you might make the core circuit a module, and import this in every schematic to achieve some effect like 'edit once, apply everywhere' to make you life easier.
+
+`sizer`'s solution to this is naive and straightforward.
+1. you have multiple circuit templates stored in multiple `.cir` files
+
+    Note that when a specific placeholder names shows up in multiple netlist files, they will later be considered the same variable parameter. For example, you have made
+    ```
+    ...
+    M7  Vout /6 VDD VDD p_33 l={l7} w={w7}
+    ...
+    ```
+    in file `ac.cir`, and, however, made
+    ```
+    ...
+    M6  Vout /6 VDD VDD p_33 l={l7} w={w7}
+    ...
+    ```
+    in file `tran.cir`, probably because of a typo. You see `l7, w7` show up twice in two different netlist files. Despite that they are assigned to different devices (one to `M7`, another to `M6`), `l7` in `ac.cir` and `l7` in `tran.cir` are still considered the *same* variable, and will be replaced by one single number later.
+
+1. read them one by one
+
+    ```python
+    with open("ac.cir") as f:
+        acTemplate = sizer.CircuitTemplate(f.read())
+    with open("op.cir") as f:
+        opTemplate = sizer.CircuitTemplate(f.read())
+    with open("tran.cir") as f:
+        tranTemplate = sizer.CircuitTemplate(f.read())
+    ...
+    ```
+
+1. order them in a list and give to a `CircuitTemplateList` object
+
+    ```python
+    templateList = sizer.CircuitTemplateList([acTemplate, opTemplate, tranTemplate])
+    ```
+
+1. define your loss function with caution
+
+    When `CircuitTemplateList` object is called in the middle of the optimization process, it will instantiate all templates contained in itself one by one, and arrange them in the *same* order as you put their templates. For example, you have chosen to arrange templates like `[ac, op, tran]`, and when later they are instantiated, your total loss function will receive a list that contains their instances in the same order.
+
+    ```python
+    def loss(circuitList):
+        acCircuit, opCircuit, tranCircuit = circuitList # remember you have defined in this way `sizer.CircuitTemplateList([acTemplate, opTemplate, tranTemplate])`
+        return np.sum([
+            bandwidthLoss(acCircuit), # different circuit goes to different loss
+            staticPowerLoss(opCircuit),
+            slewRateLoss(tranCircuit),
+            ... # other loss
+        ])
+    ```
+
+    Be sure that each loss receives the right circuit. Putting `acCircuit` into `slewRateLoss` won't do any good!
+
+1. initialize your optimizer like before
+
+    ```python
+    optimizer = sizer.optimizers.Optimizer(templateList, loss, bounds, earlyStopLoss=0)
+    ```
+
 ## Why
 
 I enjoy playing with circuit topology, but I am tired of calculating sizes to meet design specifications.
