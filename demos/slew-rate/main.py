@@ -26,6 +26,14 @@ def bandwidthLoss(circuit): # receive ac template
         print("bandwidth undefined")
         return 1 # an amp whose bandwidth is not defined is likely an ill amp.
 
+def unityGainFrequencyLoss(circuit):
+    try:
+        return np.maximum(0, (1e+7 - circuit.unityGainFrequency) / 1e+7) ** 2
+        # return np.maximum(0, (1e+7 - circuit.unityGainFrequency) / 1e+7)
+    except:
+        print("ugf undefined", end="\r")
+        return 1
+
 def gainLoss(circuit):
     return np.maximum(0, (1e+3 - np.abs(circuit.gain)) / 1e+3) ** 2
     # return np.maximum(0, (1e+3 - np.abs(circuit.gain)) / 1e+3)
@@ -62,7 +70,7 @@ def slewRateLossByRisingTime(circuit): # slew rate measured with 10% to 90% risi
     try:
         slewRate = (1.74 - 1.66) / sizer.calculators.risingTime(times, output, 1.66, 1.74)
     except:
-        print("slew rate undefined")
+        print("slew rate undefined:", np.min(output), np.max(output), end="\r")
         return 1 # an amp whose slew rate is not defined is likely an ill amp whose output never increases to 1.75 V.
     return np.maximum(0, (10e+6 - slewRate) / 10e+6) ** 2
 
@@ -81,28 +89,31 @@ def slewRateLossHybrid(circuit): # slew rate measured with the combination of th
         print("slew rate undefined")
         return 1
 
+def overshootLoss(circuit): # overshoot no more than 0.1 * delta
+    analysis = circuit.getTransientModel(start=0.4e-6, end=0.6e-6, points=50)
+    output = circuit.getOutput(analysis.nodes)
+    return np.maximum(0, (np.max(output) - 1.76) / 1.76) ** 2
+
 def loss(circuit):
     ac = circuit[0]
     tran = circuit[1]
-    return np.sum([phaseMarginLoss(ac), gainLoss(ac), bandwidthLoss(ac), slewRateLossByRisingTime(tran)])
+    return np.sum([phaseMarginLoss(ac), gainLoss(ac), bandwidthLoss(ac), slewRateLossByRisingTime(tran), overshootLoss(tran)])
 
 bounds = {
-    w: [3.5e-7, 3.5e-4] for w in ["w12", "w34", "w5", "w6", "w7", "w8"]
+    w: [0.5e-6, 100e-6] for w in ["w12", "w34", "w5", "w6", "w7", "w8"]
 }
 
 bounds.update({
-    l: [3.5e-7, 3.5e-6] for l in ["l12", "l34", "l5", "l6", "l7", "l8"]
+    l: [0.35e-6, 50e-6] for l in ["l12", "l34", "l5", "l6", "l7", "l8"]
 })
 
 bounds.update({
     "cm": [1e-12, 10e-12]
 })
 
-optimizer = sizer.optimizers.Optimizer(templates, loss, bounds, earlyStopLoss=0)
-# optimizer = sizer.optimizers.ScipyMinimizeOptimizer(templates, loss, bounds, earlyStopLoss=0)
-# circuit = circuitTemplate([bounds[i][0] for i in circuitTemplate.parameters])
-# frequencies, frequencyResponse = circuit.getFrequencyResponse()
-# raise Exception()
+# optimizer = sizer.optimizers.Optimizer(templates, loss, bounds, earlyStopLoss=0)
+optimizer = sizer.optimizers.ScipyMinimizeOptimizer(templates, loss, bounds, earlyStopLoss=0)
+# optimizer = sizer.optimizers.PyswarmParticleSwarmOptimizer(templates, loss, bounds, earlyStopLoss=0)
 start = time.time()
 circuits = optimizer.run() # optimal circuits are returned in a list
 end = time.time()
@@ -117,6 +128,7 @@ print("optimal parameters", dict(zip(templates.parameters, ac.parameters)))
 print("-" * 25)
 print("total loss:", loss(circuits))
 print("bandwidth:", ac.bandwidth)
+print("ugf:", ac.unityGainFrequency)
 print("gain:", ac.gain)
 print("phase margin:", ac.phaseMargin)
 # print("slew rate:", tran.slewRate)
